@@ -1,4 +1,4 @@
-from flask import Flask, redirect, render_template, request, flash, jsonify
+from flask import Flask, redirect, render_template, request, flash, jsonify, session, url_for
 import requests
 from flask_wtf import CSRFProtect
 from flask_csp.csp import csp_header
@@ -7,6 +7,7 @@ import os
 import userManagement as dbHandler
 from datetime import datetime
 import math
+from userManagement import signup, signin, diary_entry 
 
 # Code snippet for logging a message
 # app.logger.critical("message")
@@ -58,16 +59,20 @@ def root():
     }
 )
 def index():
+    username = session.get('username')
+    return render_template("index.html", username=username)
+
+@app.route("/about.html", methods=["GET"])
+def index():
     return render_template("index.html")
 
 @app.route("/signin.html", methods=["GET", "POST"])
 def sign_in():
     if request.method == "POST":
-        global devname
         username = request.form.get("username")
-        devname = username
         password = request.form.get("password")
         if dbHandler.signin(str(username), str(password)):
+            session['username'] = username  # Store username in session
             print(f"User {username} signed in successfully")
             return redirect("/form.html")
         else:
@@ -75,7 +80,6 @@ def sign_in():
             return render_template("signin.html", error="Invalid username or password")
     return render_template("signin.html")
 
-@app.route("/signup.html", methods=["GET", "POST"])
 def sign_up():
     if request.method == "POST":
         username = request.form.get("username")
@@ -87,8 +91,10 @@ def sign_up():
 
 @app.route("/form.html", methods=["GET", "POST"])
 def form():
+    if 'username' not in session:
+        return redirect(url_for('sign_in'))  # Redirect to sign-in page if not signed in
     if request.method == "POST":
-        Developer = devname
+        Developer = session['username']
         Project = request.form.get("Project")
         time_format = "%H:%M %d/%m/%Y"
         Start_Time = request.form.get("Start_Time")
@@ -100,22 +106,19 @@ def form():
         rounded_minutes = math.ceil(total_minutes / 15) * 15
         rounded_hours = rounded_minutes / 60
         Time_Worked = rounded_hours
-        print(f"Time Worked: {Time_Worked} hours")
-        now = datetime.now()
-        Diary_Entry = now.strftime("%H:%M %d/%B/%Y")
-        print(f"Diary_Entry: {Diary_Entry}")
         Repo = request.form.get("Repo")
         Developer_Notes = request.form.get("Developer_Notes")
-        dbHandler.signup(str(Developer), str(Project), str(Start_Time), str(End_Time), str(Time_Worked), str(Diary_Entry), str(Repo), str(Developer_Notes))
-        return render_template("form.html")
-    return render_template("form.html")       
-
+        dbHandler.diary_entry(Developer, Project, Start_Time, End_Time, Time_Worked)
+    return render_template("form.html")
 
 @app.route("/privacy.html", methods=["GET", "POST"])
 def privacy():
     return render_template("privacy.html")
 
-
+@app.route("/signout.html")
+def sign_out():
+    session.pop('username', None)
+    return redirect(url_for('index'))
 
 # Endpoint for logging CSP violations
 @app.route("/csp_report", methods=["POST"])

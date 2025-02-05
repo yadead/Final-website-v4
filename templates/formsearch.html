@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+
+{% block title %}Form Search{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>All Forms</h1>
+    <form method="GET" action="/formsearch.html">
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="Search" name="query" value="{{ request.args.get('query', '') }}">
+            <button class="btn btn-outline-secondary" type="submit">Submit</button>
+        </div>
+    </form>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Developer</th>
+                <th>Project</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Diary Entry</th>
+                <th>Time Worked</th>
+                <th>Repo</th>
+                <th>Developer Notes</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in entries %}
+            <tr>
+                <td>{{ entry[0] }}</td>
+                <td>{{ entry[1] }}</td>
+                <td>{{ entry[2] }}</td>
+                <td>{{ entry[3] }}</td>
+                <td>{{ entry[4] }}</td>
+                <td>{{ entry[5] }}</td>
+                <td>{{ entry[6] }}</td>
+                <td>{{ entry[7] }}</td>
+                <td>{{ entry[8] }}</td>
+                <td>
+                    {% if entry[1] == session.username %}
+                    <form method="POST" action="{{ url_for('delete_entry', entry_id=entry[0]) }}" style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                    {% endif %}
+                    <a href="{{ url_for('download_entry', entry_id=entry[0]) }}" class="btn btn-primary btn-sm">Download</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
