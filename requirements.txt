@@ -1,9 +1,6 @@
-Flask
+flask
 bcrypt
 flask_wtf
+flask_csp
+flask-wtf
 flask-csp
-datetime
-math
-re
-csv
-io

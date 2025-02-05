@@ -109,3 +109,13 @@ def get_entry(entry_id):
     cursor.close()
     connection.close()
     return result
+
+def username_exists(username):
+    connection = sql.connect(database_name)
+    cursor = connection.cursor()
+    query = f"SELECT 1 FROM user_table WHERE username = ?"  # Ensure 'users' is the correct table name
+    cursor.execute(query, (username,))
+    result = cursor.fetchone()
+    cursor.close()
+    connection.close()
+    return result is not None

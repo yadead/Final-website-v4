@@ -86,21 +86,6 @@ def validate_password(password):
         return False
     return True
 
-@app.route("/signup.html", methods=["GET", "POST"])
-def sign_up():
-    if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
-        
-        # Validate the password
-        if not validate_password(password):
-            return render_template("signup.html")
-        
-        dbHandler.signup(str(username), str(password))
-        flash(f"User {username} signed up successfully!", 'success')
-        return redirect("/signin.html")
-    return render_template("signup.html")
-
 @app.route("/signin.html", methods=["GET", "POST"])
 def sign_in():
     if request.method == "POST":
@@ -191,6 +176,27 @@ def download_entry(entry_id):
     output.seek(0)
     byte_output = BytesIO(output.getvalue().encode('utf-8'))
     return send_file(byte_output, mimetype='text/csv', download_name=f'entry_{entry_id}.csv', as_attachment=True)
+
+
+@app.route("/signup.html", methods=["GET", "POST"])
+def sign_up():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        
+        # Check if the username already exists
+        if dbHandler.username_exists(username):
+            flash("Username already exists. Please choose a different username.", 'danger')
+            return render_template("signup.html")
+        
+        # Validate the password
+        if not validate_password(password):
+            return render_template("signup.html")
+        
+        dbHandler.signup(str(username), str(password))
+        flash(f"User {username} signed up successfully!", 'success')
+        return redirect("/signin.html")
+    return render_template("signup.html")
 
 # Endpoint for logging CSP violations
 @app.route("/csp_report", methods=["POST"])
