@@ -1,0 +1,25 @@
+
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-3">
+        <h2>Sign Up</h2>
+        <label name="UsernameInput1" class="signup-label">Username</label>
+        <input name="username" type="username" class="form-control" id="UsernameInput1" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2, 4}$">
+      </div>
+      <div class="col-md-3">
+        <label name="PasswordInput1" class="signup-label">Password</label>
+        <input name="password" type="password" class="form-control" id="PasswordInput1" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2, 4}$">
+        <small>minimum requirements:<br> 8 characters<br> 1 uppercase<br> 1 lowercase<br> 1 number,<br> 1 special character</small>
+        </h14>
+      </div>
+      <br/>
+      <div class="col-md-6">
+        <button type="submit" class="btn btn-primary mb-3">Sign Up</button>
+      </div>
+      <input type="hidden" name="csrf_token" value = "{{ csrf_token() }}" />
+    </form>
+  </div>
+</div>
+{% endblock %}

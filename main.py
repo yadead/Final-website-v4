@@ -1,17 +1,23 @@
 from flask import Flask
 from flask import redirect
 from flask import render_template
-from flask import request
+from flask import request, flash
 from flask import jsonify
 import requests
 from flask_wtf import CSRFProtect
 from flask_csp.csp import csp_header
 import logging
-
+import os
 import userManagement as dbHandler
+from userManagement import signup, signin
+#from pyfiles.savingstuff import saveData
 
 # Code snippet for logging a message
 # app.logger.critical("message")
+
+#http://127.0.0.1:5000/ or http://localhost:5000/
+#pip install -r requirements.txt
+
 
 app_log = logging.getLogger(__name__)
 logging.basicConfig(
@@ -61,22 +67,32 @@ def root():
 def index():
     return render_template("/index.html")
 
-
-@app.route("/privacy.html", methods=["GET"])
-def privacy():
-    return render_template("/privacy.html")
-
-
-# example CSRF protected form
-@app.route("/form.html", methods=["POST", "GET"])
-def form():
+@app.route("/signin.html", methods=["GET", "POST"])
+def sign_in():
     if request.method == "POST":
-        email = request.form["email"]
-        text = request.form["text"]
-        return render_template("/form.html")
-    else:
-        return render_template("/form.html")
+        username = request.form.get("username")
+        password = request.form.get("password")
+        if dbHandler.signin(str(username), str(password)):
+            print(f"User {username} signed in successfully")
+            return redirect("/form.html")
+        else:
+            print(f"Failed sign in attempt for user {username}")
+            return render_template("signin.html", error="Invalid username or password")
+    return render_template("signin.html")
 
+@app.route("/signup.html", methods=["GET", "POST"])
+def sign_up():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        signup(str(username), str(password))
+        print(f"User {username} signed up with password {password}")
+        return redirect("/signin.html")
+    return render_template("signup.html")
+
+@app.route("/privacy.html", methods=["GET, POST"])
+def privacy():
+    return render_template("privacy.html")
 
 # Endpoint for logging CSP violations
 @app.route("/csp_report", methods=["POST"])
