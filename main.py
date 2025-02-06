@@ -198,6 +198,11 @@ def sign_up():
         return redirect("/signin.html")
     return render_template("signup.html")
 
+@app.after_request
+def set_csp(response):
+    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self';"
+    return response
+
 # Endpoint for logging CSP violations
 @app.route("/csp_report", methods=["POST"])
 @csrf.exempt
