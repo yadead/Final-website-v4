@@ -4,3 +4,4 @@ flask_wtf
 flask_csp
 flask-wtf
 flask-csp
+requests
